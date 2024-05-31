@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, HttpResponse
+from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
 from django.conf import settings
 import shutil, os
 from random import randint
@@ -9,6 +9,8 @@ from bs4 import BeautifulSoup
 from django.contrib import auth
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
+import json
+import pdb
 
 def index(request):
     try:
@@ -43,24 +45,27 @@ def createNewPage(request):
         n.save()
 
         shutil.copyfile(originFile, os.path.join(destinationPath, pageNum))
-        return redirect(f'/notion/{pageNum}/');
-
+        return redirect(f'/notion/{pageNum}')
+    
 def pageNum(request, pageNum):
     if request.user.is_active:
-        notion = Notion.objects.filter(user=request.user.username).values()
-        now = Notion.objects.filter(url=f'{pageNum}').values()
-        username = request.user.username;
+        # 현재 사용자와 관련된 모든 Notion 객체 가져오기
+        notions = Notion.objects.filter(user=request.user.username)
+        # 현재 페이지와 관련된 Notion 객체 가져오기
+        now = get_object_or_404(Notion, url=pageNum)
+        print(now)
+        username = request.user.username
         content = {
-            'notion':notion,
-            'now':now[0],
+            'notions': notions,
+            'now': now,
         }
-        return render(request, f'{username}/{pageNum}', content);
-    else :
+        return render(request, f'{username}/{pageNum}', content)
+    else:
         msg = "<script>"
-        msg += "alert('로그인 후 사용 가능합니다.');";
+        msg += "alert('로그인 후 사용 가능합니다.');"
         msg += 'location.href="/login";'
-        msg += "</script>";
-        return HttpResponse(msg);
+        msg += "</script>"
+        return HttpResponse(msg)
 
 def save(request, notionId):
     notion = Notion.objects.get(id=notionId)
@@ -167,7 +172,7 @@ http://localhost:8000/guest/{request.user.username}/{url}
     return HttpResponse(msg);
 
 
-def guest(request, user, pageNum):    
+def guest(request, user, pageNum):  
     notion = Notion.objects.filter(user=user).values()
     now = Notion.objects.filter(url=f'{pageNum}').values()
     username = user;
@@ -177,31 +182,23 @@ def guest(request, user, pageNum):
     }
     return render(request, f'{username}/{pageNum}', content);
     
-def createChild(request, url):
-    username = request.user.username;
-    originFilePath = os.path.join(settings.BASE_DIR, "template");
-    originFile = originFilePath + "\\origin.html"
-    destinationPath = os.path.join(originFilePath, username);
-    pageNum = randint(1, 9999999999);
-    pageNum = str(f'{pageNum:0>10}') + ".html";
+def createChild(request, notionId, url):
+    
+    username = request.user.username
+    originFilePath = os.path.join(settings.BASE_DIR, "template")
+    originFile = os.path.join(originFilePath, "origin.html")
+    destinationPath = os.path.join(originFilePath, username)
+    pageNum = randint(1, 9999999999)
+    pageNum = f'{pageNum:0>10}.html'
 
     if not os.path.isdir(destinationPath):
         os.mkdir(destinationPath)
 
-    n = Notion();
-    n.user = username;
-    n.url = f'{pageNum}';
-    n.date = datetime.datetime.now()
-    n.save()
+    # 부모 Notion 객체 가져오기
+    parent_notion = get_object_or_404(Notion, id=notionId)
 
-    nparent = Notion.objects.filter(url=url)
-    parent = nparent[0].parent
-    if parent != None:
-        parent = pageNum;
-    else :
-        parent = parent + "," + pageNum
-    print(parent)
-    Notion.objects.filter(url=url).update(parent=pageNum)
-
+    # 자식 Notion 생성
+    child_notion = Notion.objects.create(user=username, url=pageNum, date=datetime.datetime.now(), parent=parent_notion)
+    
     shutil.copyfile(originFile, os.path.join(destinationPath, pageNum))
-    return redirect(f'/notion/{pageNum}/');
+    return redirect(f'/notion/{pageNum}')

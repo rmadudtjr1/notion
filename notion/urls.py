@@ -22,7 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("", views.index),
     path("createNewPage/", views.createNewPage),
-    path('createChild/<url>', views.createChild),
+    path('createChild/<notionId>/<url>', views.createChild),
     path('notion/<pageNum>/', views.pageNum),
     path('guest/<user>/<pageNum>/', views.guest),
     path('save/<notionId>/', views.save),

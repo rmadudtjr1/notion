@@ -31,7 +31,6 @@
             <span id='{{ notion.id }}'>{{ notion.title|default:'제목없음' }}</span>
           </a></li>
           {% endif %}
-          <ul>
           {% for child in notion.children.all %}
             <li><a href='/notion/{{ child.url }}' class="text-decoration-none text-white">
               <span id='{{ child.id }}'>{{ child.title|default:'제목없음' }}</span>

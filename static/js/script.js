@@ -9,11 +9,13 @@ function newCreatePage() {
 
 function titleChange(value){
     let id = document.getElementById('nowId').value
+    console.log(value)
+    console.log(id)
     if (event.key == 'Enter') {
-        input = document.createElement('textarea');
+        input = document.createElement('input');
         input.setAttribute('class', 'form-control');
-        input.setAttribute('onkeyup', 'menu(this.value, "textarea")');
-        input.innerHTML = ''
+        input.setAttribute('onkeyup', 'menu(this.value)');
+        input.setAttribute('value', '');
         input.setAttribute('placeholder', '텍스트를 입력하세요.');
         div = document.getElementById('content')
         div.appendChild(input);
@@ -75,7 +77,19 @@ function transBody(){
 }
 i = 1;
 function menu(value){
-    if (value == '/'){
+    if (event.target.selectionStart == 0 && event.key == 'Backspace') {
+        if(event.target.previousElementSibling != null) {
+            now_value = event.target.value
+            size = event.target.previousElementSibling.value
+            num_size = size.length
+            event.target.previousElementSibling.value += now_value
+            event.target.previousElementSibling.focus();
+            event.target.previousElementSibling.selectionStart = Number(num_size)
+            event.target.previousElementSibling.selectionEnd = Number(num_size)
+        } 
+        event.target.remove()
+        transBody();
+    } else if (value == '/'){
         event.target.value = '';
         windowWidth = window.innerWidth;
         resultWidth = windowWidth - event.target.offsetWidth
@@ -88,10 +102,28 @@ function menu(value){
         menuselect.removeEventListener('click', slash)
         menuselect.addEventListener('click', slash);
     }  else if (event.keyCode == 13 && !event.shiftKey) {
-        input = document.createElement('textarea');
+        if (event.target.nextElementSibling != null){
+            event.target.nextElementSibling.focus();
+        } else {
+            input = document.createElement('input');
+            input.setAttribute('class', 'form-control');
+            input.setAttribute('onkeyup', 'menu(this.value)');
+            input.setAttribute('value', '');
+            input.setAttribute('placeholder', '텍스트를 입력하세요.');
+            div = document.getElementById('content')
+            div.appendChild(input);
+            input.focus();
+            transBody();
+        }
+    } else if (event.keyCode == 13 && event.shiftKey){
+        let value_num = event.target.selectionStart
+        let value_str = event.target.value
+        let str = value_str.substring(value_num, value_str.length)
+        event.target.value = value_str.substring(0, value_num)
+        input = document.createElement('input');
         input.setAttribute('class', 'form-control');
-        input.setAttribute('onkeyup', 'menu(this.value, "textarea")');
-        input.innerHTML = ''
+        input.setAttribute('onkeyup', 'menu(this.value)');
+        input.setAttribute('value', str);
         input.setAttribute('placeholder', '텍스트를 입력하세요.');
         div = document.getElementById('content')
         div.appendChild(input);
@@ -99,7 +131,7 @@ function menu(value){
         transBody();
     } else if (event.key == 'Escape'){
         menuWindow('Escape');
-    } else if (event.key == 'Delete'){
+    } else if (event.key == 'Delete' && event.shiftKey){
         if (event.target.previousElementSibling != null){
             event.target.previousElementSibling.focus();
         } else if (event.target.nextElementSibling != null){
@@ -117,7 +149,6 @@ function menu(value){
     } else {
         let target_value = event.target.value;
         let target_input = event.target;
-        console.log(event)
         if (target_input.tagName != 'TEXTAREA'){
             target_input.setAttribute('value', target_value);
         } else {
@@ -137,7 +168,6 @@ function searchTitle(value) {
 }
 
 function sendEmailBox() {
-    console.log('test')
     windowWidth = window.innerWidth;
     resultWidth = windowWidth - 300
     emailBox = document.getElementById('emailbox')
@@ -151,7 +181,9 @@ function slash(){
     if (event.target.value == 'text') {
         input = document.createElement('textarea');
         input.setAttribute('class', 'form-control');
-        input.setAttribute('onkeyup', 'menu(this.value, "textarea")');
+        input.setAttribute('onkeyup', 'menu(this.value)');
+        input.setAttribute('rows', 10)
+        input.style.visiable = false
         input.innerHTML = ''
         input.setAttribute('placeholder', '텍스트를 입력하세요.');
         div = document.getElementById('content')
@@ -161,7 +193,8 @@ function slash(){
     } else if (event.target.value == 'page') {
         url_find = window.location.pathname.split('/')
         url = url_find[2]
-        location.href = '/createChild/' + url;
+        let id = document.getElementById('nowId').value
+        location.href = '/createChild/'+ id  + "/" + url;
     } else if (event.target.value == 'subject1') {
         input = document.createElement('input');
         input.setAttribute('type', 'text');

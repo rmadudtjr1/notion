@@ -25,8 +25,19 @@
         <span id="newCreate">+새로만들기</span>  
       </a>
       <ul id="borderList">
-        {% for i in notion %}
-          <li><a href='/notion/{{ i.url }}' class="text-decoration-none text-white"><span id='{{ i.id }}'>{{ i.title|default:'제목없음' }}</span></a></li>
+        {% for notion in notions %}
+          {% if notion.parent == None %}
+          <li><a href='/notion/{{ notion.url }}' class="text-decoration-none text-white">
+            <span id='{{ notion.id }}'>{{ notion.title|default:'제목없음' }}</span>
+          </a></li>
+          {% endif %}
+          <ul>
+          {% for child in notion.children.all %}
+            <li><a href='/notion/{{ child.url }}' class="text-decoration-none text-white">
+              <span id='{{ child.id }}'>{{ child.title|default:'제목없음' }}</span>
+            </a></li>
+          {% endfor %}
+          </ul>
         {% endfor %}
       </ul>
     </div>
