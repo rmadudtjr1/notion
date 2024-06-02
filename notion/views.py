@@ -11,11 +11,12 @@ from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 import json
 import pdb
+from django.conf import settings
 
 def index(request):
     try:
-        notion = Notion.objects.filter(user=request.user.username).values()
-        url = notion[0].get('url')
+        notion = Notion.objects.filter(user=request.user.username)
+        url = notion[0].url
         return redirect(f"/notion/{url}")
     except:
         return render(request, 'notion.html')
@@ -46,18 +47,70 @@ def createNewPage(request):
 
         shutil.copyfile(originFile, os.path.join(destinationPath, pageNum))
         return redirect(f'/notion/{pageNum}')
-    
+
+def borderListFunction(notion, parent):
+    if notion.parent is None:
+        list_html = '<div>'
+        if parent.url == notion.url:
+            list_html += f"<div><span onclick='toggleChildren({notion.id})'>▽ </span><a href='/notion/{notion.url}' class='text-decoration-none text-white' onclick='toggleChildren({notion.id})'><span id='{notion.id}'>{notion.title or '제목없음'}</span></a></div>"
+            children_html = get_children_html_active(notion, 1)
+        else:
+            list_html += f"<div><span onclick='toggleChildren({notion.id})'>▷ </span><a href='/notion/{notion.url}' class='text-decoration-none text-white' onclick='toggleChildren({notion.id})'><span id='{notion.id}'>{notion.title or '제목없음'}</span></a></div>"
+            children_html = get_children_html(notion, 1)
+        if children_html:
+            if parent.url == notion.url:
+                list_html += f"<div id='children-{notion.id}'>{children_html}</div>"
+            else :
+                list_html += f"<div id='children-{notion.id}' style='display: none;'>{children_html}</div>"
+        list_html += '</div>'
+        return list_html
+    return ''
+
+def get_children_html(notion, num):
+    children_html = ""
+    for child in notion.children.all():
+        children_html += f"<div>{'&nbsp;&nbsp;&nbsp;' * num}<span onclick='toggleChildren({child.id})'>▷ </span><a href='/notion/{child.url}' class='text-decoration-none text-white' onclick='toggleChildren({child.id})'><span id='{child.id}'>{child.title or '제목없음'}</span></a>"
+        if child.children.exists():
+            children_html += f"<div id='children-{child.id}' style='display: none;'>{get_children_html(child, num+1)}</div>"
+        children_html += "</div>"
+    return children_html
+
+def get_children_html_active(notion, num):
+    children_html = ""
+    for child in notion.children.all():
+        children_html += f"<div>{'&nbsp;&nbsp;&nbsp;' * num}<span onclick='toggleChildren({child.id})'>▽ </span><a href='/notion/{child.url}' class='text-decoration-none text-white' onclick='toggleChildren({child.id})'><span id='{child.id}'>{child.title or '제목없음'}</span></a>"
+        if child.children.exists():
+            children_html += f"<div id='children-{child.id}'>{get_children_html_active(child, num+1)}</div>"
+        children_html += "</div>"
+    return children_html
+
+def parent_find(notion):
+    # 부모가 없으면 현재 노션이 최상위 부모임
+    if notion.parent is None:
+        return notion
+    # 부모가 있으면 부모를 찾아서 계속 재귀 호출
+    return parent_find(notion.parent)
+
 def pageNum(request, pageNum):
     if request.user.is_active:
         # 현재 사용자와 관련된 모든 Notion 객체 가져오기
-        notions = Notion.objects.filter(user=request.user.username)
+        notions = Notion.objects.filter(user=request.user)
         # 현재 페이지와 관련된 Notion 객체 가져오기
         now = get_object_or_404(Notion, url=pageNum)
-        print(now)
+        
+        parent = parent_find(now)
+
+        border_list = ''
+        for notion in notions:
+            if notion.parent == None:
+                border_list += borderListFunction(notion, parent)
+
         username = request.user.username
         content = {
             'notions': notions,
             'now': now,
+            'borderList':border_list,
+            'parent':parent,
         }
         return render(request, f'{username}/{pageNum}', content)
     else:
@@ -202,3 +255,27 @@ def createChild(request, notionId, url):
     
     shutil.copyfile(originFile, os.path.join(destinationPath, pageNum))
     return redirect(f'/notion/{pageNum}')
+
+
+def upload(request):
+    print(request.method)
+    if request.method == 'POST':
+        # AJAX 요청에서 파일을 받기 위해 request.FILES를 사용
+        uploaded_file = request.FILES.get('files')
+        print(uploaded_file)
+        if uploaded_file:
+            # 업로드된 파일의 경로
+            upload_path = os.path.join(settings.MEDIA_ROOT, uploaded_file.name)
+            
+            for x in request.FILES.getlist('files'):
+                upLoadFile = open(settings.MEDIA_ROOT+"\\"+str(x), 'wb')
+                for chunk in x.chunks():
+                    print(chunk)
+                    upLoadFile.write(chunk)
+            # 업로드된 파일의 이름을 반환합니다.
+            return JsonResponse({'status': 'success', 'filename': uploaded_file.name})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'No file uploaded'}, status=400)
+    else:
+        # POST 요청이 아니거나 AJAX 요청이 아닌 경우에는 405 Method Not Allowed 반환
+        return JsonResponse({'status': 'error', 'message': 'Method Not Allowed'}, status=405)

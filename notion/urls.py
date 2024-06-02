@@ -31,4 +31,5 @@ urlpatterns = [
     path('logout/', views.logout),
     path('register/', views.createAccount),
     path('sendEmail/', views.sendEmail),
+    path('upload/', views.upload),
 ]

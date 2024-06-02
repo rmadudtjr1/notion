@@ -220,7 +220,63 @@ function slash(){
         input.focus();
         transBody();
     } else if (event.target.value == 'files') {
-        console.log('files');
+        div_s = document.createElement("div");
+        div_s.setAttribute('class', 'input-group')
+        input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('name', 'files');
+        input.setAttribute('class', 'form-control');
+        input.setAttribute('id', 'imageInput');
+        btn = document.createElement("button")
+        btn.setAttribute('onclick', 'uploadImage()');
+        btn.setAttribute('class', 'btn btn-outline-secondary')
+        btn.innerText = "업로드"
+
+        div_s.appendChild(input)
+        div_s.appendChild(btn)
+        div = document.getElementById('content')
+        div.appendChild(div_s);
     }
     menuWindow('close')
+}
+
+function toggleChildren(id) {
+    var childrenDiv = document.getElementById('children-' + id);
+    if (childrenDiv == null){
+        return;
+    } else if (childrenDiv.style.display === 'none') {
+        event.target.innerText = '▽ '
+        childrenDiv.style.display = 'block';
+    } else {
+        event.target.innerText = '▷ '
+        childrenDiv.style.display = 'none';
+    }
+}
+
+
+function uploadImage() {
+    var fileInput = document.getElementById('imageInput');
+    var file = fileInput.files[0];
+    
+    var formData = new FormData();
+    formData.append('image', file);
+    const csrftoken = getCookie('csrftoken');
+
+    fetch('/upload/', {
+        method: 'POST',
+        headers: {
+            'Content-Type':'application/json',
+            'X-CSRFToken': csrftoken,
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        console.log('Image uploaded successfully.');
+    })
+    .catch(error => {
+        console.error('There was a problem with the upload:', error);
+    });
 }

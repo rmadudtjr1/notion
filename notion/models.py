@@ -8,3 +8,5 @@ class Notion(models.Model):
     content = models.TextField()
     date = models.DateTimeField()
 
+    def __str__(self):
+        return self.url;
