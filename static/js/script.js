@@ -1,6 +1,15 @@
+let imageCnt = 0;
 window.onload = function(){
     let newCreate = document.getElementById('newCreate');
     newCreate.addEventListener('click', newCreatePage);
+    imageList = document.querySelectorAll('[id*=previewDiv]')
+    for (var i=0;i<imageList.length;i++){
+        cnt = imageList[i].id.substr(imageList[i].id.length-1)
+        if (Number(cnt) > imageCnt) {
+            imageCnt = Number(cnt) + 1;
+            console.log(imageCnt)
+        }
+    }
 }
 
 function newCreatePage() {
@@ -220,13 +229,16 @@ function slash(){
         input.focus();
         transBody();
     } else if (event.target.value == 'files') {
+
         div_s = document.createElement("div");
         div_s.setAttribute('class', 'input-group')
+        div_s.setAttribute('id','imageDiv');
         input = document.createElement('input');
         input.setAttribute('type', 'file');
         input.setAttribute('name', 'files');
         input.setAttribute('class', 'form-control');
         input.setAttribute('id', 'imageInput');
+        input.setAttribute('onChange', 'readURL(this,'+imageCnt+')')
         btn = document.createElement("button")
         btn.setAttribute('onclick', 'uploadImage()');
         btn.setAttribute('class', 'btn btn-outline-secondary')
@@ -234,8 +246,16 @@ function slash(){
 
         div_s.appendChild(input)
         div_s.appendChild(btn)
+        div_p = document.createElement("div");
+        div_p.setAttribute('id', 'previewDiv' + imageCnt++)
+        div_p.setAttribute('class', 'text-center')
         div = document.getElementById('content')
         div.appendChild(div_s);
+        div.appendChild(div_p);
+
+        if (div_s.previousElementSibling != null){
+            div_s.previousElementSibling.remove();
+        }
     }
     menuWindow('close')
 }
@@ -253,30 +273,41 @@ function toggleChildren(id) {
     }
 }
 
+function readURL(obj, imageCnt) {
+    document.getElementById('imageDiv').remove();
+    let reader = new FileReader();
+    if(!obj.files.length) {
+        return;
+    }
+    reader.readAsDataURL(obj.files[0]);
+    reader.onload = function (e) {
+        let img = document.createElement('img');
+        img.setAttribute('width', '50%')
+        img.setAttribute('src', e.target.result);
+        img.setAttribute('onclick', 'test()')
+        let btn = document.createElement('button')
+        btn.setAttribute('onclick', 'imageRemove("previewDiv'+imageCnt+'")')
+        btn.innerText = '이미지삭제'
+        btn.setAttribute('class', 'form-control btn btn-danger w-80')
+        document.getElementById('previewDiv'+imageCnt).append(img);
+        document.getElementById('previewDiv'+imageCnt).append(btn);
+        imageCnt++;
+        transBody();
+    }
+}
 
-function uploadImage() {
-    var fileInput = document.getElementById('imageInput');
-    var file = fileInput.files[0];
-    
-    var formData = new FormData();
-    formData.append('image', file);
-    const csrftoken = getCookie('csrftoken');
+function imageRemove(id){
+    document.getElementById(id).innerHTML = "";
+    transBody();
+}
 
-    fetch('/upload/', {
-        method: 'POST',
-        headers: {
-            'Content-Type':'application/json',
-            'X-CSRFToken': csrftoken,
-        },
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        console.log('Image uploaded successfully.');
-    })
-    .catch(error => {
-        console.error('There was a problem with the upload:', error);
-    });
+function test(){
+    input = document.createElement('input');
+    input.setAttribute('class', 'form-control');
+    input.setAttribute('onkeyup', 'menu(this.value)');
+    input.setAttribute('placeholder', '텍스트를 입력하세요.');
+    div = document.getElementById('content')
+    div.appendChild(input);
+    input.focus();
+    transBody();
 }
