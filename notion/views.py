@@ -212,32 +212,30 @@ def createAccount(request):
 
 def sendEmail(request):
     url = request.GET.get('url');
+
+    subject = f'{request.user.username}님 notion 공유'
+    message = f'안녕하세요. {request.user.username} 님이 공유하신 페이지 입니다.'
+    message += f'http://it-kys-notion.kro.kr/{url}'
+    email_from = '관리자 <admin@test.com>'
+    email = EmailMessage(subject, message, email_from)
+
+    toEmail = request.GET.get('emails')
+    email.to = toEmail.split(',')
+    result = email.send()
+
+
+    msg = '<script>'
     try :
-        toEmail = request.GET.get('emails')
-        toEmail = toEmail.split(',')
-        email = EmailMessage(
-            f'{request.user.username} 공유', #이메일 제목
-            f'''안녕하세요. {request.user.username} 님이 공유하신 페이지 입니다.
-
-http://13.60.19.146/guest/{request.user.username}/{url}
-            ''', #내용
-            to=toEmail, #받는 이메일
-        )
-        result = email.send()
-
-        if result == 1:
-            msg = "<script>"
-            msg += "alert('이메일 전송이 완료되었습니다.');";
+        if result :
+            msg += 'alert("이메일 전송이 완료 되었습니다.");'
         else:
-            msg = "<script>"
-            msg += "alert('이메일 전송에 실패 했습니다.');";
+            msg += 'alert("이메일 전송에 실패 했습니다.");'
     except:
-        msg = "<script>"
-        msg += "alert('이메일 전송에 실패 했습니다.');";
+        msg += 'alert("이메일 주소를 확인하세요.");'
     
-    msg += f"location.href='/notion/{url}';";
+    msg += f'location.href="/notion/{url}";'
     msg += "</script>"
-    
+
     return HttpResponse(msg);
 
 
