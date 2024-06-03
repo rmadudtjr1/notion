@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notion</title>
-  <script src="/static/js/script.js/"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <style>
@@ -75,3 +74,347 @@
   <input type="hidden" id='parent' value="{{ parent.id }}">
 </body>
 </html>
+<script>
+  let imageCnt = 0;
+window.onload = function(){
+    let newCreate = document.getElementById('newCreate');
+    newCreate.addEventListener('click', newCreatePage);
+    imageList = document.querySelectorAll('[id*=previewDiv]')
+    for (var i=0;i<imageList.length;i++){
+        cnt = imageList[i].id.substr(imageList[i].id.length-1)
+        if (Number(cnt) > imageCnt) {
+            imageCnt = Number(cnt) + 1;
+            console.log(imageCnt)
+        }
+    }
+}
+
+function newCreatePage() {
+    location.href='/createNewPage/';
+}
+
+function titleChange(value){
+    let id_value = document.getElementById('nowId').value
+    if (event.key == 'Enter') {
+        input = document.createElement('input');
+        input.setAttribute('class', 'form-control');
+        input.setAttribute('onkeyup', 'menu(this.value)');
+        input.setAttribute('value', '');
+        input.setAttribute('placeholder', '텍스트를 입력하세요.');
+        div = document.getElementById('content')
+        div.appendChild(input);
+        input.focus();
+        transBody();
+    } else {
+        if (value.length == 10) {
+            text = document.getElementById(id_value).innerText
+            document.getElementById(id_value).innerText = text + '...';
+        } else if (value.length < 10){
+            document.getElementById(id_value).innerText = value;
+        } else {
+
+        }
+        transTitle(value);
+    }
+}
+
+function getCookie(name) {
+    var value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return value? value[2] : null;
+}
+
+
+function transTitle(value){
+    let bodyContent = document.getElementById('content')
+    const csrftoken = getCookie('csrftoken');
+    let nowId = document.getElementById('nowId').value
+    fetch('http://localhost:8000/save/'+nowId+'/', {
+        method:'POST',
+        headers: {
+            'Content-Type':'application/json',
+            'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify({ title:value })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success: s');
+    })
+    .catch((error) => {
+        console.log('Error : e');
+    });
+}
+
+function transBody(){
+    let bodyContent = document.getElementById('content').innerHTML
+    const csrftoken = getCookie('csrftoken');
+    let nowId = document.getElementById('nowId').value
+    fetch('http://localhost:8000/saveBody/'+nowId+'/', {
+        method:'POST',
+        headers: {
+            'Content-Type':'application/json',
+            'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify({ content:bodyContent })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success : s2');
+    })
+    .catch((error) => {
+        console.log('Error : e2');
+    });
+}
+i = 1;
+function menu(value){
+    if (event.target.selectionStart == 0 && event.key == 'Backspace') {
+        if(event.target.previousElementSibling != null) {
+            now_value = event.target.value
+            size = event.target.previousElementSibling.value
+            num_size = size.length
+            event.target.previousElementSibling.value += now_value
+            event.target.previousElementSibling.focus();
+            event.target.previousElementSibling.selectionStart = Number(num_size)
+            event.target.previousElementSibling.selectionEnd = Number(num_size)
+        } 
+        event.target.remove()
+        transBody();
+    } else if (value == '/'){
+        event.target.value = '';
+        windowWidth = window.innerWidth;
+        resultWidth = windowWidth - event.target.offsetWidth
+        menuselect = document.getElementById('menuselect');
+        menuselect.style.display='block';
+        menuselect.style.position='absolute';
+        console.log(event.target.offsetTop)
+        if (Number(event.target.offsetTop) > 940) {
+            menuselect.style.top = 790 + 'px';
+        } else {
+            menuselect.style.top = event.target.offsetTop + 30 + 'px';
+        }
+        menuselect.style.left = resultWidth + 'px';
+        
+        menuselect.removeEventListener('click', slash)
+        menuselect.addEventListener('click', slash);
+    }  else if (event.keyCode == 13 && !event.shiftKey) {
+        if (event.target.nextElementSibling != null){
+            event.target.nextElementSibling.focus();
+        } else {
+            input = document.createElement('input');
+            input.setAttribute('class', 'form-control');
+            input.setAttribute('onkeyup', 'menu(this.value)');
+            input.setAttribute('value', '');
+            input.setAttribute('placeholder', '텍스트를 입력하세요.');
+            div = document.getElementById('content')
+            div.appendChild(input);
+            input.focus();
+            transBody();
+        }
+    } else if (event.keyCode == 13 && event.shiftKey){
+        let value_num = event.target.selectionStart
+        let value_str = event.target.value
+        let str = value_str.substring(value_num, value_str.length)
+        event.target.value = value_str.substring(0, value_num)
+        input = document.createElement('input');
+        input.setAttribute('class', 'form-control');
+        input.setAttribute('onkeyup', 'menu(this.value)');
+        input.setAttribute('value', str);
+        input.setAttribute('placeholder', '텍스트를 입력하세요.');
+        div = document.getElementById('content')
+        div.appendChild(input);
+        input.focus();
+        transBody();
+    } else if (event.key == 'Escape'){
+        console.log(event.target);
+        menuWindow('Escape');
+    } else if (event.key == 'Delete' && event.shiftKey){
+        if (event.target.previousElementSibling != null){
+            event.target.previousElementSibling.focus();
+        } else if (event.target.nextElementSibling != null){
+            event.target.nextElementSibling.focus();
+        }
+        event.target.remove();
+    } else if (event.key == 'ArrowUp' && event.shiftKey){
+        if (event.target.previousElementSibling != null){
+            event.target.previousElementSibling.focus();        
+        }
+    } else if (event.key == 'ArrowDown' && event.shiftKey){
+        if (event.target.nextElementSibling != null) {
+            event.target.nextElementSibling.focus();
+        }
+    } else {
+        let target_value = event.target.value;
+        let target_input = event.target;
+        if (target_input.tagName != 'TEXTAREA'){
+            target_input.setAttribute('value', target_value);
+        } else {
+            target_input.innerHTML = target_value;
+        }
+        transBody();
+    }
+}
+
+function menuWindow(value){
+    menuselect = document.getElementById('menuselect');
+    menuselect.style.display='none';
+}
+
+function searchTitle(value) {
+    console.log(value)
+}
+
+function sendEmailBox() {
+    emailBox = document.getElementById('emailbox')
+    if(emailBox.style.display == 'none') {
+        windowWidth = window.innerWidth;
+        resultWidth = windowWidth - 660
+        emailBox.style.border = '1px solid black';
+        emailBox.style.background='white';
+        emailBox.style.display='block';
+        emailBox.style.position='absolute';
+        emailBox.style.width = '350px';
+        emailBox.style.height = '100px';
+        emailBox.setAttribute('class', 'text-center d-flex flex-column justify-content-center')
+        emailBox.style.top = event.target.offsetTop + 70 + 'px';
+        emailBox.style.left = resultWidth + 'px';
+    } else {
+        emailBox.style.display = 'none';
+        emailBox.removeAttribute('class');
+    }
+   
+}
+
+function slash(){
+    if (event.target.value == 'text') {
+        input = document.createElement('textarea');
+        input.setAttribute('class', 'form-control');
+        input.setAttribute('onkeyup', 'menu(this.value)');
+        input.setAttribute('rows', 10)
+        input.style.visiable = false
+        input.innerHTML = ''
+        input.setAttribute('placeholder', '텍스트를 입력하세요.');
+        div = document.getElementById('content')
+        div.appendChild(input);
+        input.focus();
+        transBody();
+    } else if (event.target.value == 'page') {
+        url_find = window.location.pathname.split('/')
+        url = url_find[2]
+        let id = document.getElementById('nowId').value
+        location.href = '/createChild/'+ id  + "/" + url;
+    } else if (event.target.value == 'subject1') {
+        input = document.createElement('input');
+        input.setAttribute('type', 'text');
+        input.setAttribute('class', 'form-control');
+        input.setAttribute('style', 'font-size:30px;font-weight:bold');
+        input.setAttribute('onkeyup', 'menu(this.value)');
+        input.setAttribute('value', '');
+        input.setAttribute('placeholder', '제목을 입력하세요.');
+        div = document.getElementById('content')
+        div.appendChild(input);
+        input.focus();
+        transBody();
+    } else if (event.target.value == 'subject2') {
+        input = document.createElement('input');
+        input.setAttribute('type', 'text');
+        input.setAttribute('class', 'form-control');
+        input.setAttribute('style', 'font-size:20px;font-weight:bold');
+        input.setAttribute('onkeyup', 'menu(this.value)');
+        input.setAttribute('value', '');
+        input.setAttribute('placeholder', '부제목을 입력하세요.');
+        div = document.getElementById('content')
+        div.appendChild(input);
+        input.focus();
+        transBody();
+    } else if (event.target.value == 'files') {
+
+        div_s = document.createElement("div");
+        div_s.setAttribute('class', 'input-group')
+        div_s.setAttribute('id','imageDiv');
+        input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('name', 'files');
+        input.setAttribute('class', 'form-control');
+        input.setAttribute('id', 'imageInput');
+        input.setAttribute('onChange', 'readURL(this,'+imageCnt+')')
+        btn = document.createElement("button")
+        btn.setAttribute('onclick', 'uploadImage()');
+        btn.setAttribute('class', 'btn btn-outline-secondary')
+        btn.innerText = "업로드"
+
+        div_s.appendChild(input)
+        div_s.appendChild(btn)
+        div_p = document.createElement("div");
+        div_p.setAttribute('id', 'previewDiv' + imageCnt++)
+        div_p.setAttribute('class', 'text-center')
+        div = document.getElementById('content')
+        div.appendChild(div_s);
+        div.appendChild(div_p);
+
+        if (div_s.previousElementSibling != null){
+            div_s.previousElementSibling.remove();
+        }
+    }
+    menuWindow('close')
+}
+
+function toggleChildren(id) {
+    var childrenDiv = document.getElementById('children-' + id);
+    if (childrenDiv == null){
+        return;
+    } else if (childrenDiv.style.display === 'none') {
+        event.target.innerText = '▽ '
+        childrenDiv.style.display = 'block';
+    } else {
+        event.target.innerText = '▷ '
+        childrenDiv.style.display = 'none';
+    }
+}
+
+function readURL(obj, imageCnt) {
+    document.getElementById('imageDiv').remove();
+    let reader = new FileReader();
+    if(!obj.files.length) {
+        return;
+    }
+    reader.readAsDataURL(obj.files[0]);
+    reader.onload = function (e) {
+        let img = document.createElement('img');
+        img.setAttribute('width', '30%')
+        img.setAttribute('src', e.target.result);
+        img.setAttribute('onclick', 'test()')
+        let btn = document.createElement('button')
+        btn.setAttribute('onclick', 'imageRemove("previewDiv'+imageCnt+'")')
+        btn.innerText = '이미지삭제'
+        btn.setAttribute('class', 'form-control btn btn-danger w-80')
+        document.getElementById('previewDiv'+imageCnt).append(img);
+        document.getElementById('previewDiv'+imageCnt).append(btn);
+        imageCnt++;
+        transBody();
+    }
+}
+
+function imageRemove(id){
+    document.getElementById(id).innerHTML = "";
+    transBody();
+}
+
+function test(){
+    input = document.createElement('input');
+    input.setAttribute('class', 'form-control');
+    input.setAttribute('onkeyup', 'menu(this.value)');
+    input.setAttribute('placeholder', '텍스트를 입력하세요.');
+    div = document.getElementById('content')
+    div.appendChild(input);
+    input.focus();
+    transBody();
+}
+
+function sendemail(target) {
+    if (event.key == 'Escape') {
+        emailBox = document.getElementById('emailbox')
+        emailBox.removeAttribute('class')
+        emailBox.style.display = 'none';
+    }
+}
+</script>
