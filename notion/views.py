@@ -29,7 +29,7 @@ def createNewPage(request):
     else :
         username = request.user.username;
         originFilePath = os.path.join(settings.BASE_DIR, "template");
-        originFile = originFilePath + "\\origin.html"
+        originFile = originFilePath + "/origin.html"
         destinationPath = os.path.join(originFilePath, username);
         pageNum = randint(1, 9999999999);
         pageNum = str(f'{pageNum:0>10}') + ".html";
@@ -272,29 +272,6 @@ def createChild(request, notionId, url):
     shutil.copyfile(originFile, os.path.join(destinationPath, pageNum))
     return redirect(f'/notion/{pageNum}')
 
-
-def upload(request):
-    print(request.method)
-    if request.method == 'POST':
-        # AJAX 요청에서 파일을 받기 위해 request.FILES를 사용
-        uploaded_file = request.FILES.get('files')
-        print(uploaded_file)
-        if uploaded_file:
-            # 업로드된 파일의 경로
-            upload_path = os.path.join(settings.MEDIA_ROOT, uploaded_file.name)
-            
-            for x in request.FILES.getlist('files'):
-                upLoadFile = open(settings.MEDIA_ROOT+"\\"+str(x), 'wb')
-                for chunk in x.chunks():
-                    print(chunk)
-                    upLoadFile.write(chunk)
-            # 업로드된 파일의 이름을 반환합니다.
-            return JsonResponse({'status': 'success', 'filename': uploaded_file.name})
-        else:
-            return JsonResponse({'status': 'error', 'message': 'No file uploaded'}, status=400)
-    else:
-        # POST 요청이 아니거나 AJAX 요청이 아닌 경우에는 405 Method Not Allowed 반환
-        return JsonResponse({'status': 'error', 'message': 'Method Not Allowed'}, status=405)
 
 def remove(request, notionId):
     notion = Notion.objects.get(id=notionId);
