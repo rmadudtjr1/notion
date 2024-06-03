@@ -186,8 +186,9 @@ function menu(value){
         menuselect = document.getElementById('menuselect');
         menuselect.style.display='block';
         menuselect.style.position='absolute';
-        if (Number(event.target.offsetTop) > 790) {
-            menuselect.style.top = 780 + 'px';
+        console.log(event.target.offsetTop)
+        if (Number(event.target.offsetTop) > 940) {
+            menuselect.style.top = 790 + 'px';
         } else {
             menuselect.style.top = event.target.offsetTop + 30 + 'px';
         }
@@ -196,8 +197,7 @@ function menu(value){
         menuselect.removeEventListener('click', slash)
         menuselect.addEventListener('click', slash);
     }  else if (event.keyCode == 13 && !event.shiftKey) {
-	if (event.target.tagName == 'TEXTAREA'){
-	} else if (event.target.nextElementSibling != null){
+        if (event.target.nextElementSibling != null){
             event.target.nextElementSibling.focus();
         } else {
             input = document.createElement('input');
@@ -264,12 +264,10 @@ function searchTitle(value) {
 }
 
 function sendEmailBox() {
-    console.log('test');
-	emailBox = document.getElementById('emailbox')
+    emailBox = document.getElementById('emailbox')
     if(emailBox.style.display == 'none') {
         windowWidth = window.innerWidth;
-        resultWidth = windowWidth - 910
-	console.log(resultWidth)
+        resultWidth = windowWidth - 660
         emailBox.style.border = '1px solid black';
         emailBox.style.background='white';
         emailBox.style.display='block';

@@ -197,6 +197,7 @@ function menu(value){
         menuselect.addEventListener('click', slash);
     }  else if (event.keyCode == 13 && !event.shiftKey) {
 	if (event.target.tagName == 'TEXTAREA'){
+		console.log('text')	
 	} else if (event.target.nextElementSibling != null){
             event.target.nextElementSibling.focus();
         } else {
