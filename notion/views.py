@@ -219,7 +219,7 @@ def sendEmail(request):
             f'{request.user.username} 공유', #이메일 제목
             f'''안녕하세요. {request.user.username} 님이 공유하신 페이지 입니다.
 
-http://localhost:8000/guest/{request.user.username}/{url}
+http://13.60.19.146/guest/{request.user.username}/{url}
             ''', #내용
             to=toEmail, #받는 이메일
         )
