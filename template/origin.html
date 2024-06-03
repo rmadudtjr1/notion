@@ -79,7 +79,14 @@
 window.onload = function(){
     let newCreate = document.getElementById('newCreate');
     newCreate.addEventListener('click', newCreatePage);
-    console.log('뭐지')
+    imageList = document.querySelectorAll('[id*=previewDiv]')
+    for (var i=0;i<imageList.length;i++){
+        cnt = imageList[i].id.substr(imageList[i].id.length-1)
+        if (Number(cnt) > imageCnt) {
+            imageCnt = Number(cnt) + 1;
+            console.log(imageCnt)
+        }
+    }
 }
 
 function newCreatePage() {
