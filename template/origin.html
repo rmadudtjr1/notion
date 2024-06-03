@@ -121,7 +121,7 @@ function transTitle(value){
     let bodyContent = document.getElementById('content')
     const csrftoken = getCookie('csrftoken');
     let nowId = document.getElementById('nowId').value
-    fetch('http://localhost:8000/save/'+nowId+'/', {
+    fetch('/save/'+nowId+'/', {
         method:'POST',
         headers: {
             'Content-Type':'application/json',
