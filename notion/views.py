@@ -214,8 +214,8 @@ def sendEmail(request):
     url = request.GET.get('url');
 
     subject = f'{request.user.username}님 notion 공유'
-    message = f'안녕하세요. {request.user.username} 님이 공유하신 페이지 입니다.'
-    message += f'http://it-kys-notion.kro.kr/{url}'
+    message = f'안녕하세요. {request.user.username} 님이 공유하신 페이지 입니다.\n'
+    message += f'http://it-kys-notion.kro.kr/guest/{request.user.username}/{url}/'
     email_from = '관리자 <admin@test.com>'
     email = EmailMessage(subject, message, email_from)
 
