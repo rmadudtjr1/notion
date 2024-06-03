@@ -32,4 +32,5 @@ urlpatterns = [
     path('register/', views.createAccount),
     path('sendEmail/', views.sendEmail),
     path('upload/', views.upload),
+    path('notion/remove/<notionId>', views.remove),
 ]

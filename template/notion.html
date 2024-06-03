@@ -10,33 +10,35 @@
 </head>
 <body>
   <div class="row">
-    <div class="col-1 vh-100 p-4 text-white bg-dark" style="width:250px;">
-      <a class="d-inline align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        {% if user.is_active %}
-        <p class="w-100 text-center">{{ user.username }}님 페이지</p>
-        <button class='btn btn-info btn-sm w-100' type="button" onclick="location.href='/logout'">로그아웃</button>
-        {% else %}
-        <p class="w-100 text-center">개인 페이지</p>
-          <button class='btn btn-info btn-sm w-100' type="button" onclick="location.href='/login'">로그인</button>
-        {% endif %}
-      </a>
-      <hr>
-      <a class="d-inline align-items-right text-white text-decoration-none "> 
-        <span id="newCreate">+새로만들기</span>  
-      </a>
-      <ul>
-        {% for i in notion %}
-          <li><a href='/{{ i.url }}'>{{ i.title }}</a></li>
-        {% endfor %}
-      </ul>
-    </div>
-    <div id="content" class="col vh-100 m-3 d-flex flex-column">
-      {% if now %}
-      <h3 class="w-100"><input class='form-control' type='text' name='title' id="title" onchange="titleChange()" 
-          value="{{ now.title }}"
-          placeholder="제목없음"></h3>
-      {% endif %}
-    </div>
-  </div>
+    <div class="row">
+      <div class="col-1 vh-100 text-white bg-dark" style="width:250px;overflow-y: scroll;">
+        <div class="sticky-top bg-dark p-4">
+        <a class="d-inline align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+          {% if user.is_active %}
+          <p class="w-100 text-center">{{ user.username }}님 페이지</p>
+          <button class='btn btn-info btn-sm w-100' type="button" onclick="location.href='/logout'">로그아웃</button>
+          {% else %}
+          <p class="w-100 text-center">개인 페이지</p>
+            <button class='btn btn-info btn-sm w-100' type="button" onclick="location.href='/login'">로그인</button>
+          {% endif %}
+        </a>
+        <hr>
+        <a class="d-inline align-items-right text-white text-decoration-none "> 
+          <span id="newCreate">+새로만들기</span>  
+        </a>
+        </div>
+        {{borderList|safe}}
+      </div>
+      <div id="body" class="col p-4 vh-100 d-flex flex-column" style="overflow-y: scroll;">
+        <div class="sticky-top">
+          <button type="button" class="btn btn-secondary btn-sm w-10" style="width:100px;float:right;" onclick="sendEmailBox()">공유</button>
+          <div id="emailbox" class="col" style="display: none;">
+            <form action="/sendEmail">
+              <input type="hidden" name="url" value="{{ now.url }}">
+              <input type="text" name="emails"><button type="submit">보내기</button>
+            </form>
+          </div>
+        </div>
+        <hr>
 </body>
 </html>

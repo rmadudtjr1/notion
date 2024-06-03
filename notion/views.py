@@ -50,12 +50,18 @@ def createNewPage(request):
 
 def borderListFunction(notion, parent):
     if notion.parent is None:
+        title = '';
+        if notion.title != '':
+            title = notion.title[:10]
+            if len(title) == 10:
+                title = title + '...';
+
         list_html = '<div>'
         if parent.url == notion.url:
-            list_html += f"<div><span onclick='toggleChildren({notion.id})'>▽ </span><a href='/notion/{notion.url}' class='text-decoration-none text-white' onclick='toggleChildren({notion.id})'><span id='{notion.id}'>{notion.title or '제목없음'}</span></a></div>"
+            list_html += f"<div><span onclick='toggleChildren({notion.id})'>▽ </span><a href='/notion/{notion.url}' class='text-decoration-none text-white' onclick='toggleChildren({notion.id})'><span id='{notion.id}'>{title or '제목없음'}</span></a><a href='/notion/remove/{ notion.id }' id='removeId' class='text-decoration-none text-white'><span style='float:right;'>─</span></a></div>"
             children_html = get_children_html_active(notion, 1)
         else:
-            list_html += f"<div><span onclick='toggleChildren({notion.id})'>▷ </span><a href='/notion/{notion.url}' class='text-decoration-none text-white' onclick='toggleChildren({notion.id})'><span id='{notion.id}'>{notion.title or '제목없음'}</span></a></div>"
+            list_html += f"<div><span onclick='toggleChildren({notion.id})'>▷ </span><a href='/notion/{notion.url}' class='text-decoration-none text-white' onclick='toggleChildren({notion.id})'><span id='{notion.id}'>{title or '제목없음'}</span></a><a href='/notion/remove/{ notion.id }' id='removeId' class='text-decoration-none text-white'><span style='float:right;'>─</span></a></div>"
             children_html = get_children_html(notion, 1)
         if children_html:
             if parent.url == notion.url:
@@ -69,7 +75,13 @@ def borderListFunction(notion, parent):
 def get_children_html(notion, num):
     children_html = ""
     for child in notion.children.all():
-        children_html += f"<div>{'&nbsp;&nbsp;&nbsp;' * num}<span onclick='toggleChildren({child.id})'>▷ </span><a href='/notion/{child.url}' class='text-decoration-none text-white' onclick='toggleChildren({child.id})'><span id='{child.id}'>{child.title or '제목없음'}</span></a>"
+        title = '';
+        if child.title != '':
+            title = child.title[:10]
+            if len(title) == 10:
+                title = title + '...'
+
+        children_html += f"<div>{'&nbsp;&nbsp;&nbsp;' * num}<span onclick='toggleChildren({child.id})'>▷ </span><a href='/notion/{child.url}' class='text-decoration-none text-white' onclick='toggleChildren({child.id})'><span id='{child.id}'  >{title or '제목없음'}</span></a><a href='/notion/remove/{ child.id }' id='removeId' class='text-decoration-none text-white'><span style='float:right;'>─</span></a>"
         if child.children.exists():
             children_html += f"<div id='children-{child.id}' style='display: none;'>{get_children_html(child, num+1)}</div>"
         children_html += "</div>"
@@ -78,7 +90,13 @@ def get_children_html(notion, num):
 def get_children_html_active(notion, num):
     children_html = ""
     for child in notion.children.all():
-        children_html += f"<div>{'&nbsp;&nbsp;&nbsp;' * num}<span onclick='toggleChildren({child.id})'>▽ </span><a href='/notion/{child.url}' class='text-decoration-none text-white' onclick='toggleChildren({child.id})'><span id='{child.id}'>{child.title or '제목없음'}</span></a>"
+        title = '';
+        if child.title != '':
+            title = child.title[:10]
+            if len(title) == 10:
+                title = title + '...'
+                
+        children_html += f"<div>{'&nbsp;&nbsp;&nbsp;' * num}<span onclick='toggleChildren({child.id})'>▷ </span><a href='/notion/{child.url}' class='text-decoration-none text-white' onclick='toggleChildren({child.id})'><span id='{child.id}'  >{title or '제목없음'}</span></a><a href='/notion/remove/{ child.id }' id='removeId' class='text-decoration-none text-white'><span style='float:right;'>─</span></a>"
         if child.children.exists():
             children_html += f"<div id='children-{child.id}'>{get_children_html_active(child, num+1)}</div>"
         children_html += "</div>"
@@ -100,11 +118,11 @@ def pageNum(request, pageNum):
         
         parent = parent_find(now)
 
-        border_list = ''
+        border_list = '<div class="px-4">'
         for notion in notions:
             if notion.parent == None:
                 border_list += borderListFunction(notion, parent)
-
+        border_list += "</div>"
         username = request.user.username
         content = {
             'notions': notions,
@@ -279,3 +297,15 @@ def upload(request):
     else:
         # POST 요청이 아니거나 AJAX 요청이 아닌 경우에는 405 Method Not Allowed 반환
         return JsonResponse({'status': 'error', 'message': 'Method Not Allowed'}, status=405)
+
+def remove(request, notionId):
+    notion = Notion.objects.get(id=notionId);
+    title = notion.title;
+    if title == "":
+        title = '제목없음'
+    notion.delete()
+    msg = "<script>"
+    msg += f"alert('{title} 제목의 글을 삭제했습니다.');"
+    msg += "location.href='/';"
+    msg += "</script>"
+    return HttpResponse(msg);

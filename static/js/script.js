@@ -17,9 +17,7 @@ function newCreatePage() {
 }
 
 function titleChange(value){
-    let id = document.getElementById('nowId').value
-    console.log(value)
-    console.log(id)
+    let id_value = document.getElementById('nowId').value
     if (event.key == 'Enter') {
         input = document.createElement('input');
         input.setAttribute('class', 'form-control');
@@ -31,8 +29,15 @@ function titleChange(value){
         input.focus();
         transBody();
     } else {
-        document.getElementById(id).innerText = value;
-        transTitle();
+        if (value.length == 10) {
+            text = document.getElementById(id_value).innerText
+            document.getElementById(id_value).innerText = text + '...';
+        } else if (value.length < 10){
+            document.getElementById(id_value).innerText = value;
+        } else {
+
+        }
+        transTitle(value);
     }
 }
 
@@ -42,18 +47,17 @@ function getCookie(name) {
 }
 
 
-function transTitle(){
+function transTitle(value){
     let bodyContent = document.getElementById('content')
     const csrftoken = getCookie('csrftoken');
     let nowId = document.getElementById('nowId').value
-    let titleText = document.getElementById(nowId).innerText;
     fetch('http://localhost:8000/save/'+nowId+'/', {
         method:'POST',
         headers: {
             'Content-Type':'application/json',
             'X-CSRFToken': csrftoken,
         },
-        body: JSON.stringify({ title:titleText })
+        body: JSON.stringify({ title:value })
     })
     .then(response => response.json())
     .then(data => {
@@ -105,7 +109,12 @@ function menu(value){
         menuselect = document.getElementById('menuselect');
         menuselect.style.display='block';
         menuselect.style.position='absolute';
-        menuselect.style.top = event.target.offsetTop + 30 + 'px';
+        console.log(event.target.offsetTop)
+        if (Number(event.target.offsetTop) > 940) {
+            menuselect.style.top = 790 + 'px';
+        } else {
+            menuselect.style.top = event.target.offsetTop + 30 + 'px';
+        }
         menuselect.style.left = resultWidth + 'px';
         
         menuselect.removeEventListener('click', slash)
@@ -139,6 +148,7 @@ function menu(value){
         input.focus();
         transBody();
     } else if (event.key == 'Escape'){
+        console.log(event.target);
         menuWindow('Escape');
     } else if (event.key == 'Delete' && event.shiftKey){
         if (event.target.previousElementSibling != null){
@@ -177,13 +187,24 @@ function searchTitle(value) {
 }
 
 function sendEmailBox() {
-    windowWidth = window.innerWidth;
-    resultWidth = windowWidth - 300
     emailBox = document.getElementById('emailbox')
-    emailBox.style.display='block';
-    emailBox.style.position='absolute';
-    emailBox.style.top = event.target.offsetTop + 70 + 'px';
-    emailBox.style.left = resultWidth + 'px';
+    if(emailBox.style.display == 'none') {
+        windowWidth = window.innerWidth;
+        resultWidth = windowWidth - 660
+        emailBox.style.border = '1px solid black';
+        emailBox.style.background='white';
+        emailBox.style.display='block';
+        emailBox.style.position='absolute';
+        emailBox.style.width = '350px';
+        emailBox.style.height = '100px';
+        emailBox.setAttribute('class', 'text-center d-flex flex-column justify-content-center')
+        emailBox.style.top = event.target.offsetTop + 70 + 'px';
+        emailBox.style.left = resultWidth + 'px';
+    } else {
+        emailBox.style.display = 'none';
+        emailBox.removeAttribute('class');
+    }
+   
 }
 
 function slash(){
@@ -282,7 +303,7 @@ function readURL(obj, imageCnt) {
     reader.readAsDataURL(obj.files[0]);
     reader.onload = function (e) {
         let img = document.createElement('img');
-        img.setAttribute('width', '50%')
+        img.setAttribute('width', '30%')
         img.setAttribute('src', e.target.result);
         img.setAttribute('onclick', 'test()')
         let btn = document.createElement('button')
@@ -310,4 +331,12 @@ function test(){
     div.appendChild(input);
     input.focus();
     transBody();
+}
+
+function sendemail(target) {
+    if (event.key == 'Escape') {
+        emailBox = document.getElementById('emailbox')
+        emailBox.removeAttribute('class')
+        emailBox.style.display = 'none';
+    }
 }
