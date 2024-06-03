@@ -5,12 +5,10 @@ from random import randint
 from .models import Notion
 import datetime, json
 from django.http import JsonResponse
-from bs4 import BeautifulSoup
 from django.contrib import auth
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 import json
-import pdb
 from django.conf import settings
 
 def index(request):
@@ -95,7 +93,7 @@ def get_children_html_active(notion, num):
             title = child.title[:10]
             if len(title) == 10:
                 title = title + '...'
-                
+
         children_html += f"<div>{'&nbsp;&nbsp;&nbsp;' * num}<span onclick='toggleChildren({child.id})'>▷ </span><a href='/notion/{child.url}' class='text-decoration-none text-white' onclick='toggleChildren({child.id})'><span id='{child.id}'  >{title or '제목없음'}</span></a><a href='/notion/remove/{ child.id }' id='removeId' class='text-decoration-none text-white'><span style='float:right;'>─</span></a>"
         if child.children.exists():
             children_html += f"<div id='children-{child.id}'>{get_children_html_active(child, num+1)}</div>"
