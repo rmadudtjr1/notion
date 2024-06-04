@@ -169,9 +169,7 @@ function transBody(){
 i = 1;
 function menu(value){
     if (event.target.selectionStart == 0 && event.key == 'Backspace') {
-        if(event.target.placeholder == '할일') {
-            return;
-        } else if(event.target.previousElementSibling != null) {
+        if(event.target.previousElementSibling != null) {
             now_value = event.target.value
             size = event.target.previousElementSibling.value
             num_size = size.length
@@ -294,24 +292,19 @@ function sendEmailBox() {
 function slash(){
     if (event.target.value == 'todo'){
         content = document.createElement('div')
-        content.setAttribute('class', 'input-group')
-        checkdiv = document.createElement('div')
-        checkdiv.setAttribute('class', 'input-group-text')
-        check = document.createElement('input')
-        check.setAttribute('type', 'checkbox')
-        check.setAttribute('onclick', 'todoText()');
+        content.innerHTML = '<input aria-labelledby=":r1k:" type="checkbox" style="position: relative; flex-shrink: 0; flex-grow: 0; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; transition: background 200ms ease-out 0s; --pseudoHover--background: rgba(55,53,47,.08); --pseudoActive--background: rgba(55,53,47,.16); background: rgb(35, 131, 226);">'
         input = document.createElement('input');
         input.setAttribute('type', 'text');
-        input.setAttribute('class', 'form-control');
-        input.setAttribute('style', 'margin-left:5px;')
+        input.setAttribute('class', 'form-control col');
         input.setAttribute('onkeyup', 'menu(this.value)');
         input.setAttribute('value', '');
         input.setAttribute('placeholder', '할일');
-        checkdiv.appendChild(check)
-        content.appendChild(checkdiv)
         content.appendChild(input)
         div = document.getElementById('content')
         div.appendChild(content);
+        
+
+        
     } else if (event.target.value == 'text') {
         input = document.createElement('textarea');
         input.setAttribute('class', 'form-control');
@@ -445,14 +438,9 @@ function sendemail(target) {
     }
 }
 
-function todoText() {
-    value = event.target.parentElement.parentElement.children[1].style.textDecoration
-    console.log(value.length)
-    if (value.length != 0) {
-        event.target.parentElement.parentElement.children[1].removeAttribute('style');
-    } else {
-        event.target.parentElement.parentElement.children[1].setAttribute('style', 'text-decoration:line-through')
-    }    
+function checkSelect(){
+    event.target.setAttribute('style', 'position: relative; flex-shrink: 0; flex-grow: 0; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; transition: background 200ms ease-out 0s; --pseudoHover--background: rgba(55,53,47,.08); --pseudoActive--background: rgba(55,53,47,.16); background: rgb(35, 131, 226);')
 }
+
 </script>
 

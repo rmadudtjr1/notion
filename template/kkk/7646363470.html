@@ -169,9 +169,7 @@ function transBody(){
 i = 1;
 function menu(value){
     if (event.target.selectionStart == 0 && event.key == 'Backspace') {
-        if(event.target.placeholder == '할일') {
-            return;
-        } else if(event.target.previousElementSibling != null) {
+        if(event.target.previousElementSibling != null) {
             now_value = event.target.value
             size = event.target.previousElementSibling.value
             num_size = size.length
@@ -248,6 +246,7 @@ function menu(value){
             event.target.nextElementSibling.focus();
         }
     } else {
+        console.log("이모지 : ", value);
         let target_value = event.target.value;
         let target_input = event.target;
         if (target_input.tagName != 'TEXTAREA'){
@@ -299,7 +298,8 @@ function slash(){
         checkdiv.setAttribute('class', 'input-group-text')
         check = document.createElement('input')
         check.setAttribute('type', 'checkbox')
-        check.setAttribute('onclick', 'todoText()');
+        check.setAttribute('class', 'form-check-input mt-2')
+        check.setAttribute('style', 'lineheight:inherit;')
         input = document.createElement('input');
         input.setAttribute('type', 'text');
         input.setAttribute('class', 'form-control');
@@ -445,14 +445,5 @@ function sendemail(target) {
     }
 }
 
-function todoText() {
-    value = event.target.parentElement.parentElement.children[1].style.textDecoration
-    console.log(value.length)
-    if (value.length != 0) {
-        event.target.parentElement.parentElement.children[1].removeAttribute('style');
-    } else {
-        event.target.parentElement.parentElement.children[1].setAttribute('style', 'text-decoration:line-through')
-    }    
-}
 </script>
 

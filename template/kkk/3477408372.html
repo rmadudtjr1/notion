@@ -169,9 +169,7 @@ function transBody(){
 i = 1;
 function menu(value){
     if (event.target.selectionStart == 0 && event.key == 'Backspace') {
-        if(event.target.placeholder == '할일') {
-            return;
-        } else if(event.target.previousElementSibling != null) {
+        if(event.target.previousElementSibling != null) {
             now_value = event.target.value
             size = event.target.previousElementSibling.value
             num_size = size.length
@@ -248,6 +246,7 @@ function menu(value){
             event.target.nextElementSibling.focus();
         }
     } else {
+        console.log("이모지 : ", value);
         let target_value = event.target.value;
         let target_input = event.target;
         if (target_input.tagName != 'TEXTAREA'){
@@ -295,20 +294,13 @@ function slash(){
     if (event.target.value == 'todo'){
         content = document.createElement('div')
         content.setAttribute('class', 'input-group')
-        checkdiv = document.createElement('div')
-        checkdiv.setAttribute('class', 'input-group-text')
-        check = document.createElement('input')
-        check.setAttribute('type', 'checkbox')
-        check.setAttribute('onclick', 'todoText()');
+        content.innerHTML = '<input type="checkbox" class="form-check-input">'
         input = document.createElement('input');
         input.setAttribute('type', 'text');
         input.setAttribute('class', 'form-control');
-        input.setAttribute('style', 'margin-left:5px;')
         input.setAttribute('onkeyup', 'menu(this.value)');
         input.setAttribute('value', '');
         input.setAttribute('placeholder', '할일');
-        checkdiv.appendChild(check)
-        content.appendChild(checkdiv)
         content.appendChild(input)
         div = document.getElementById('content')
         div.appendChild(content);
@@ -445,14 +437,5 @@ function sendemail(target) {
     }
 }
 
-function todoText() {
-    value = event.target.parentElement.parentElement.children[1].style.textDecoration
-    console.log(value.length)
-    if (value.length != 0) {
-        event.target.parentElement.parentElement.children[1].removeAttribute('style');
-    } else {
-        event.target.parentElement.parentElement.children[1].setAttribute('style', 'text-decoration:line-through')
-    }    
-}
 </script>
 

@@ -169,8 +169,9 @@ function transBody(){
 i = 1;
 function menu(value){
     if (event.target.selectionStart == 0 && event.key == 'Backspace') {
+        console.log(event.target.placeholder)
         if(event.target.placeholder == '할일') {
-            return;
+            console.log('그냥')
         } else if(event.target.previousElementSibling != null) {
             now_value = event.target.value
             size = event.target.previousElementSibling.value

@@ -169,9 +169,7 @@ function transBody(){
 i = 1;
 function menu(value){
     if (event.target.selectionStart == 0 && event.key == 'Backspace') {
-        if(event.target.placeholder == '할일') {
-            return;
-        } else if(event.target.previousElementSibling != null) {
+        if(event.target.previousElementSibling != null) {
             now_value = event.target.value
             size = event.target.previousElementSibling.value
             num_size = size.length
@@ -446,13 +444,7 @@ function sendemail(target) {
 }
 
 function todoText() {
-    value = event.target.parentElement.parentElement.children[1].style.textDecoration
-    console.log(value.length)
-    if (value.length != 0) {
-        event.target.parentElement.parentElement.children[1].removeAttribute('style');
-    } else {
-        event.target.parentElement.parentElement.children[1].setAttribute('style', 'text-decoration:line-through')
-    }    
+    console.log(event.target.parentElement.children[1])
 }
 </script>
 
