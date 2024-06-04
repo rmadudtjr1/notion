@@ -211,8 +211,7 @@ function menu(value){
             input.focus();
             transBody();
         }
-    } else if (event.key == 'Enter' && event.shiftKey){
-	   console.log('aaa');
+    } else if (event.keyCode == 13 && event.shiftKey){
         let value_num = event.target.selectionStart
         let value_str = event.target.value
         let str = value_str.substring(value_num, value_str.length)
